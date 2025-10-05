@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>@rissed · terminal web-app</title>
+<style>
+  :root{
+    --bg:#0d0e10;
+    --panel:#111215;
+    --border:#1a1b1f;
+    --fg:#e9e9ea;
+    --mut:#9aa0a6;
+    --acc:#00f5c8;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.5 "JetBrains Mono","Fira Mono","SFMono-Regular",Consolas,monospace;
+    display:grid;place-items:center;overflow:hidden; /* без скролла */
+  }
+
+  /* карточка в духе Telegram mini-app + Behance case */
+  .app{
+    width:min(860px,92vw);
+    max-height:92vh;
+    background:linear-gradient(180deg,#121317, #0f1013);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 24px 64px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.02);
+    display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;
+  }
+  .header{
+    height:44px;display:flex;align-items:center;justify-content:center;
+    color:var(--mut);font-size:14px;letter-spacing:.02em;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#14161a,#101216);
+  }
+
+  .content{
+    display:grid;grid-template-columns:1.05fr .95fr;gap:24px;
+    padding:18px 18px 8px;
+  }
+  @media (max-width:760px){ .content{grid-template-columns:1fr;gap:14px} }
+
+  /* панель ASCII — аккуратно центрируем и масштабируем без скролла */
+  .art{
+    border:1px solid var(--border);border-radius:12px;background:#0d0f12;
+    padding:14px 10px;display:grid;place-items:center;position:relative;overflow:hidden;
+  }
+  .ascii{
+    margin:0;white-space:pre;line-height:1.06;letter-spacing:.02em;color:var(--acc);
+    /* масштаб под контейнер: clamp защищает от переполнения */
+    font-size: clamp(9px, 1.5vw, 14px);
+    /* красивое проявление и «дыхание» */
+    animation: reveal 2000ms steps(12,end) forwards, breathe 6s ease-in-out infinite 2s;
+    opacity:0; will-change:opacity,clip-path,filter;
+  }
+  @keyframes reveal{
+    from{clip-path:inset(100% 0 0 0); opacity:0}
+    to  {clip-path:inset(0 0 0 0); opacity:1}
+  }
+  @keyframes breathe{
+    0%,100%{filter:brightness(1);opacity:1}
+    50%{filter:brightness(1.08);opacity:.92}
+  }
+
+  /* колонка данных */
+  .info{
+    border:1px solid var(--border);border-radius:12px;background:#0d0f12;
+    padding:16px 14px;display:grid;gap:8px;align-content:start;overflow:hidden;
+  }
+  .row{display:block}
+  .k{color:var(--acc)} .v{color:var(--fg)}
+  .mut{color:var(--mut)}
+  .sep{height:1px;background:#16181c;margin:6px 0 8px}
+
+  /* печать первой строки для живости */
+  .typing{display:inline-block;white-space:nowrap;overflow:hidden;border-right:2px solid var(--acc);
+          animation: typing 2.2s steps(40,end) forwards, caret .8s step-end infinite;}
+  @keyframes typing{from{width:0} to{width:100%}}
+  @keyframes caret{50%{border-color:transparent}}
+
+  /* ссылки-ники — строгие «пилюли» */
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 10px;border:1px solid #1c1e23;border-radius:10px;
+    background:linear-gradient(180deg,#13161a,#101216);
+    color:var(--fg);text-decoration:none;font-size:14px;
+    transition:transform .15s ease,border-color .15s ease,background .15s ease;
+  }
+  .badge:hover{transform:translateY(-1px);border-color:#24272e}
+  .tg{width:14px;height:14px;opacity:.9;display:inline-block}
+
+  .footer{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 12px;border-top:1px solid var(--border);color:var(--mut);font-size:12px;
+  }
+
+  /* еле заметные scan-lines поверх контента — как «экран» */
+  .screenFX{position:relative}
+  .screenFX::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.06) 0 1px,transparent 2px 3px);
+    opacity:.06;
+  }
+</style>
+</head>
+<body>
+  <main class="app">
+    <div class="header">rissed- adapter card</div>
+
+    <section class="content screenFX">
+      <!-- ASCII панель -->
+      <div class="art">
+<pre class="ascii">
+⣿⣿⣿⣶⣤⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣧⡘⣿⣿⠿⢛⠻⣿⣿⠿⠿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⡿⡸⠿⠘⣇⢹⡏⢴⣿⣿⢌⣶⣾⣷⢹
+⣿⣿⣿⣿⣿⣿⣿⡿⠟⠛⠙⢿⣾⣷⣷⣮⣶⠿⠇⢸⠸⣷⡘⣿⣿⣿⣿⣿⠟⣼
+⣿⣿⣿⣿⣿⡿⣉⣴⡶⣀⣀⣸⣿⣿⣿⣿⣇⣴⣶⡸⣇⢻⣿⡌⣿⡿⠟⣡⣾⣿
+⣿⣿⣿⣿⣿⣷⢹⣿⣯⣭⣽⣿⣿⣿⣿⣟⣛⢿⣿⣷⡹⡌⢿⣿⣨⣶⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⡎⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⢹⣿⣿⢇⣷⠈⠟⠻⣿⢉⣴⠘⢻
+⣿⣿⣾⣿⣿⣿⣷⠙⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⡿⢋⣾⡿⢀⣾⠄⣡⣾⣴⡟⣸
+⣿⣿⣿⣿⣿⢿⣿⡄⠻⠿⣿⣿⣿⡿⠿⠿⢟⣫⣼⡿⢋⣤⣿⣿⣼⣿⣿⠟⣠⣿
+⣿⣿⣿⣿⠿⡈⣿⣷⢠⣛⣿⡿⠿⣛⣬⣭⣍⣛⠃⣴⣿⣿⣿⣿⠿⣋⣤⣾⣿⣿
+</pre>
+      </div>
+
+      <!-- Инфо панель -->
+      <div class="info">
+        <span class="row"><span class="k">user:</span> <span class="v typing">&nbsp;@rissed</span></span>
+        <div class="sep"></div>
+
+        <span class="row k">Description:</span>
+        <span class="row v">Мега аноним +888</span>
+        <span class="row v">Начинающий web разработчик.</span>
+
+        <div class="sep"></div>
+        <span class="row k">username:</span>
+        <div class="badges" aria-label="Telegram usernames">
+          <a class="badge" href="https://t.me/rissed" target="_blank" rel="noopener">
+            <svg class="tg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.036 15.28 8.9 18.94c.508 0 .728-.218.992-.48l2.385-2.288 4.943 3.62c.906.5 1.553.237 1.8-.84l3.26-15.277c.289-1.35-.487-1.876-1.37-1.546L1.69 9.232C.382 9.74.402 10.5 1.47 10.83l5.61 1.75 13.05-8.22c.614-.372 1.174-.166.713.206"/></svg>
+            @rissed
+          </a>
+          <a class="badge" href="https://t.me/enuef" target="_blank" rel="noopener">
+            <svg class="tg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.036 15.28 8.9 18.94c.508 0 .728-.218.992-.48l2.385-2.288 4.943 3.62c.906.5 1.553.237 1.8-.84l3.26-15.277c.289-1.35-.487-1.876-1.37-1.546L1.69 9.232C.382 9.74.402 10.5 1.47 10.83l5.61 1.75 13.05-8.22c.614-.372 1.174-.166.713.206"/></svg>
+            @enuef
+          </a>
+          <a class="badge" href="https://t.me/scuof" target="_blank" rel="noopener">
+            <svg class="tg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.036 15.28 8.9 18.94c.508 0 .728-.218.992-.48l2.385-2.288 4.943 3.62c.906.5 1.553.237 1.8-.84l3.26-15.277c.289-1.35-.487-1.876-1.37-1.546L1.69 9.232C.382 9.74.402 10.5 1.47 10.83l5.61 1.75 13.05-8.22c.614-.372 1.174-.166.713.206"/></svg>
+            @scuof
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span class="mut">adapter - rissed</span>
+      <span class="mut">© 2025</span>
+    </div>
+  </main>
+</body>
+</html>
